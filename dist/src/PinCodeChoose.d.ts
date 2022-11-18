@@ -1,7 +1,7 @@
 /// <reference types="react" />
-import { PinStatus } from './PinCode';
-import * as React from 'react';
-import { StyleProp, TextStyle, ViewStyle } from 'react-native';
+import { PinStatus } from "./PinCode";
+import * as React from "react";
+import { StyleProp, TextStyle, ViewStyle } from "react-native";
 /**
  * Pin Code Choose PIN Page
  */
@@ -67,6 +67,7 @@ export interface IProps {
     validationRegex?: RegExp;
     vibrationEnabled?: boolean;
     delayBetweenAttempts?: number;
+    callbackError?: () => void;
 }
 export declare type IState = {
     status: PinStatus;
