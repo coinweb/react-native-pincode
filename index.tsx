@@ -26,6 +26,7 @@ export type IProps = {
     buttonDeleteComponent?: any;
     buttonDeleteText?: string;
     buttonNumberComponent?: any;
+    callbackError?: () => void;
     callbackErrorTouchId?: (error: Error) => void;
     colorCircleButtons?: string;
     colorPassword?: string;
@@ -348,6 +349,7 @@ class PINCode extends React.PureComponent<IProps, IState> {
                         validationRegex={this.props.validationRegex}
                         vibrationEnabled={this.props.vibrationEnabled}
                         delayBetweenAttempts={this.props.delayBetweenAttempts}
+                        callbackError={this.props.callbackError}
                     />
                 )}
                 {status === PinStatus.enter &&
@@ -518,6 +520,7 @@ class PINCode extends React.PureComponent<IProps, IState> {
                             delayBetweenAttempts={
                                 this.props.delayBetweenAttempts
                             }
+                            callbackError={this.props.callbackError}
                         />
                     )}
                 {isLocked &&

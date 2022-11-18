@@ -66,6 +66,7 @@ export interface IProps {
     validationRegex?: RegExp;
     vibrationEnabled?: boolean;
     delayBetweenAttempts?: number;
+    callbackError?: () => void;
 }
 export interface IState {
     password: string;

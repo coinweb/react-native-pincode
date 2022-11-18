@@ -1,8 +1,8 @@
 /// <reference types="react" />
-import { PinStatus } from './PinCode';
-import { PinResultStatus } from './utils';
-import * as React from 'react';
-import { StyleProp, TextStyle, ViewStyle } from 'react-native';
+import { PinStatus } from "./PinCode";
+import { PinResultStatus } from "./utils";
+import * as React from "react";
+import { StyleProp, TextStyle, ViewStyle } from "react-native";
 /**
  * Pin Code Enter PIN Page
  */
@@ -80,6 +80,7 @@ export interface IProps {
     passcodeFallback?: boolean;
     vibrationEnabled?: boolean;
     delayBetweenAttempts?: number;
+    callbackError?: () => void;
 }
 export interface IState {
     pinCodeStatus: PinResultStatus;
