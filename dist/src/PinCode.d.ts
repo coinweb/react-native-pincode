@@ -97,7 +97,6 @@ declare class PinCode extends React.PureComponent<IProps, IState> {
     onPressButtonNumber: (text: string) => Promise<void>;
     renderButtonNumber: (text: string) => JSX.Element;
     endProcess: (pwd: string) => void;
-    doShake(): Promise<void>;
     showError(isErrorValidation?: boolean): Promise<void>;
     renderCirclePassword: () => JSX.Element;
     renderButtonDelete: (opacity: number) => JSX.Element;
