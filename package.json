@@ -47,6 +47,7 @@
   "dependencies": {
     "@react-native-community/async-storage": "^1.7.1",
     "d3-ease": "^1.0.3",
+    "expo-local-authentication": "^13.0.2",
     "lodash": "^4.17.5",
     "react-move": "^2.7.0",
     "react-native-easy-grid": "^0.2.2",

@@ -2431,6 +2431,13 @@ expect@^23.6.0:
     jest-message-util "^23.4.0"
     jest-regex-util "^23.3.0"
 
+expo-local-authentication@^13.0.2:
+  version "13.0.2"
+  resolved "https://registry.yarnpkg.com/expo-local-authentication/-/expo-local-authentication-13.0.2.tgz#a785e589119538e0c328b65c0f63e162a423ad5f"
+  integrity sha512-YqyIix9+oyBbJ8Wgp/ZBQBbWbo4FMVWWibyOhrUfyx9wwRiElAlJZ52ne6XzcJEjLOSqCy4/xkhhC5LJtbnGTw==
+  dependencies:
+    invariant "^2.2.4"
+
 extend-shallow@^1.1.2:
   version "1.1.4"
   resolved "https://registry.npmjs.org/extend-shallow/-/extend-shallow-1.1.4.tgz"
