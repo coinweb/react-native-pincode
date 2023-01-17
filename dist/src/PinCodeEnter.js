@@ -7,7 +7,7 @@ const async_storage_1 = require("@react-native-community/async-storage");
 const React = require("react");
 const react_native_1 = require("react-native");
 const Keychain = require("react-native-keychain");
-const react_native_touch_id_1 = require("react-native-touch-id");
+const LocalAuthentication = require("expo-local-authentication");
 class PinCodeEnter extends React.PureComponent {
     constructor(props) {
         super(props);
@@ -85,32 +85,33 @@ class PinCodeEnter extends React.PureComponent {
         }
     }
     triggerTouchID() {
-        !!react_native_touch_id_1.default &&
-            react_native_touch_id_1.default.isSupported()
-                .then(() => {
-                setTimeout(() => {
-                    this.launchTouchID();
-                });
-            })
-                .catch((error) => {
-                console.warn("TouchID error", error);
+        LocalAuthentication.hasHardwareAsync()
+            .then(() => {
+            setTimeout(() => {
+                this.launchTouchID();
             });
+        })
+            .catch((error) => {
+            console.warn("TouchID error", error);
+        });
     }
     async launchTouchID() {
-        const optionalConfigObject = {
-            imageColor: "#e00606",
-            imageErrorColor: "#ff0000",
-            sensorDescription: "Touch sensor",
-            sensorErrorDescription: "Failed",
-            cancelText: this.props.textCancelButtonTouchID || "Cancel",
-            fallbackLabel: "Show Passcode",
-            unifiedErrors: false,
-            passcodeFallback: this.props.passcodeFallback,
-        };
+        // const optionalConfigObject = {
+        // 	imageColor: "#e00606",
+        // 	imageErrorColor: "#ff0000",
+        // 	sensorDescription: "Touch sensor",
+        // 	sensorErrorDescription: "Failed",
+        // 	cancelText: this.props.textCancelButtonTouchID || "Cancel",
+        // 	fallbackLabel: "Show Passcode",
+        // 	unifiedErrors: false,
+        // 	passcodeFallback: this.props.passcodeFallback,
+        // };
         try {
-            await react_native_touch_id_1.default.authenticate(this.props.touchIDSentence, Object.assign({}, optionalConfigObject, {
-                title: this.props.touchIDTitle,
-            })).then((success) => {
+            await LocalAuthentication.authenticateAsync({
+                promptMessage: this.props.touchIDSentence,
+                fallbackLabel: "Show Passcode",
+                cancelLabel: this.props.textCancelButtonTouchID || "Cancel",
+            }).then((success) => {
                 this.endProcess(this.props.storedPin || this.keyChainResult);
             });
         }
