@@ -102,7 +102,7 @@ class PinCodeEnter extends React.PureComponent {
 	}
 	triggerTouchID() {
 		!!expo_local_authentication
-			.hasHardwareAsync()()
+			.hasHardwareAsync()
 			.then(() => {
 				setTimeout(() => {
 					this.launchTouchID();
