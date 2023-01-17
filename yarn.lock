@@ -5087,11 +5087,6 @@ react-native-keychain@^6.1.1:
   resolved "https://registry.npmjs.org/react-native-keychain/-/react-native-keychain-6.1.1.tgz"
   integrity sha512-WYvAg7FbYPyX8jJ1rY/IQGS+6zK5LtNMRa3E8x1n0M5Lmsm/9CHtakzbmqT+rLvFE7DpPBg7qFawMuUoDjjtYA==
 
-react-native-touch-id@^4.4.1:
-  version "4.4.1"
-  resolved "https://registry.npmjs.org/react-native-touch-id/-/react-native-touch-id-4.4.1.tgz"
-  integrity sha512-1jTl8fC+0fxvqegy/XXTyo6vMvPhjzkoDdaqoYZx0OH8AT250NuXnNPyKktvigIcys3+2acciqOeaCall7lrvg==
-
 react-native-vector-icons@^7.0.0:
   version "7.0.0"
   resolved "https://registry.npmjs.org/react-native-vector-icons/-/react-native-vector-icons-7.0.0.tgz"
