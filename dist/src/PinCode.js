@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.PinStatus = void 0;
 const delay_1 = require("./delay");
 const colors_1 = require("./design/colors");
 const grid_1 = require("./design/grid");
@@ -15,12 +16,12 @@ var PinStatus;
     PinStatus["choose"] = "choose";
     PinStatus["confirm"] = "confirm";
     PinStatus["enter"] = "enter";
-})(PinStatus = exports.PinStatus || (exports.PinStatus = {}));
+})(PinStatus || (exports.PinStatus = PinStatus = {}));
 class PinCode extends React.PureComponent {
     constructor(props) {
         super(props);
         this.failedAttempt = async () => {
-            await delay_1.default(300);
+            await (0, delay_1.default)(300);
             this.setState({
                 showError: true,
                 attemptFailed: true,
@@ -29,12 +30,12 @@ class PinCode extends React.PureComponent {
             this.props.callbackError && this.props.callbackError();
             if (this.props.getCurrentLength)
                 this.props.getCurrentLength(0);
-            await delay_1.default(this.props.delayBetweenAttempts);
+            await (0, delay_1.default)(this.props.delayBetweenAttempts);
             this.newAttempt();
         };
         this.newAttempt = async () => {
             this.setState({ changeScreen: true });
-            await delay_1.default(200);
+            await (0, delay_1.default)(200);
             this.setState({
                 changeScreen: false,
                 showError: false,
@@ -68,7 +69,7 @@ class PinCode extends React.PureComponent {
                         break;
                     case PinStatus.enter:
                         this.props.endProcess(currentPassword);
-                        await delay_1.default(300);
+                        await (0, delay_1.default)(300);
                         break;
                     default:
                         break;
@@ -315,16 +316,16 @@ class PinCode extends React.PureComponent {
     }
     async showError(isErrorValidation = false) {
         this.setState({ changeScreen: true });
-        await delay_1.default(300);
+        await (0, delay_1.default)(300);
         this.setState({ showError: true, changeScreen: false });
         if (this.props.getCurrentLength)
             this.props.getCurrentLength(0);
         this.props.callbackError && this.props.callbackError();
-        await delay_1.default(3000);
+        await (0, delay_1.default)(3000);
         this.setState({ changeScreen: true });
-        await delay_1.default(200);
+        await (0, delay_1.default)(200);
         this.setState({ showError: false, password: "" });
-        await delay_1.default(200);
+        await (0, delay_1.default)(200);
         this.props.endProcess(this.state.password, isErrorValidation);
         if (isErrorValidation)
             this.setState({ changeScreen: false });

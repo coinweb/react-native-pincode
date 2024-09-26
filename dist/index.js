@@ -1,11 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.hasUserSetPinCode = hasUserSetPinCode;
+exports.deleteUserPinCode = deleteUserPinCode;
+exports.resetPinCodeInternalStates = resetPinCodeInternalStates;
 const ApplicationLocked_1 = require("./src/ApplicationLocked");
 const PinCode_1 = require("./src/PinCode");
 const PinCodeChoose_1 = require("./src/PinCodeChoose");
 const PinCodeEnter_1 = require("./src/PinCodeEnter");
 const utils_1 = require("./src/utils");
-const async_storage_1 = require("@react-native-community/async-storage");
+const async_storage_1 = require("@react-native-async-storage/async-storage");
 const React = require("react");
 const react_native_1 = require("react-native");
 const disableLockScreenDefault = false;
@@ -75,20 +78,17 @@ PINCode.defaultProps = {
     styleMainContainer: null,
 };
 function hasUserSetPinCode(serviceName) {
-    return utils_1.hasPinCode(serviceName || pinCodeKeychainNameDefault);
+    return (0, utils_1.hasPinCode)(serviceName || pinCodeKeychainNameDefault);
 }
-exports.hasUserSetPinCode = hasUserSetPinCode;
 function deleteUserPinCode(serviceName) {
-    return utils_1.deletePinCode(serviceName || pinCodeKeychainNameDefault);
+    return (0, utils_1.deletePinCode)(serviceName || pinCodeKeychainNameDefault);
 }
-exports.deleteUserPinCode = deleteUserPinCode;
 function resetPinCodeInternalStates(pinAttempsStorageName, timePinLockedStorageName) {
-    return utils_1.resetInternalStates([
+    return (0, utils_1.resetInternalStates)([
         pinAttempsStorageName || pinAttemptsAsyncStorageNameDefault,
         timePinLockedStorageName || timePinLockedAsyncStorageNameDefault,
     ]);
 }
-exports.resetPinCodeInternalStates = resetPinCodeInternalStates;
 exports.default = PINCode;
 let styles = react_native_1.StyleSheet.create({
     container: {
