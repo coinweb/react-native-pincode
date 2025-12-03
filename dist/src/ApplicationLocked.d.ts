@@ -40,11 +40,11 @@ declare class ApplicationLocked extends React.PureComponent<IProps, IState> {
     componentDidMount(): void;
     timer(): Promise<void>;
     componentWillUnmount(): void;
-    renderButton: () => JSX.Element;
-    renderTimer: (minutes: number, seconds: number) => JSX.Element;
-    renderTitle: () => JSX.Element;
-    renderIcon: () => JSX.Element;
-    renderErrorLocked: () => JSX.Element;
-    render(): JSX.Element;
+    renderButton: () => React.JSX.Element;
+    renderTimer: (minutes: number, seconds: number) => React.JSX.Element;
+    renderTitle: () => React.JSX.Element;
+    renderIcon: () => React.JSX.Element;
+    renderErrorLocked: () => React.JSX.Element;
+    render(): React.JSX.Element;
 }
 export default ApplicationLocked;

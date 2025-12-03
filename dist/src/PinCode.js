@@ -11,6 +11,7 @@ const Animate_1 = require("react-move/Animate");
 const react_native_1 = require("react-native");
 const react_native_easy_grid_1 = require("react-native-easy-grid");
 const MaterialIcons_1 = require("react-native-vector-icons/MaterialIcons");
+const Icon = MaterialIcons_1.default;
 var PinStatus;
 (function (PinStatus) {
     PinStatus["choose"] = "choose";
@@ -51,8 +52,7 @@ class PinCode extends React.PureComponent {
             if (currentPassword.length === this.props.passwordLength) {
                 switch (this.props.status) {
                     case PinStatus.choose:
-                        if (this.props.validationRegex &&
-                            this.props.validationRegex.test(currentPassword)) {
+                        if (this.props.validationRegex && this.props.validationRegex.test(currentPassword)) {
                             this.showError(true);
                         }
                         else {
@@ -89,17 +89,11 @@ class PinCode extends React.PureComponent {
                 ["9", "WXYZ"],
                 ["0", " "],
             ]);
-            const disabled = (this.state.password.length === this.props.passwordLength ||
-                this.state.showError) &&
-                !this.state.attemptFailed;
+            const disabled = (this.state.password.length === this.props.passwordLength || this.state.showError) && !this.state.attemptFailed;
             return (React.createElement(Animate_1.default, { show: true, start: {
                     opacity: 1,
                 }, update: {
-                    opacity: [
-                        this.state.showError && !this.state.attemptFailed
-                            ? 0.5
-                            : 1,
-                    ],
+                    opacity: [this.state.showError && !this.state.attemptFailed ? 0.5 : 1],
                     timing: { duration: 200, ease: d3_ease_1.easeLinear },
                 } }, ({ opacity }) => (React.createElement(react_native_1.TouchableHighlight, { style: [
                     styles.buttonCircle,
@@ -114,12 +108,9 @@ class PinCode extends React.PureComponent {
                             this.props.styleTextButton,
                             {
                                 opacity: opacity,
-                                color: this.state.textButtonSelected ===
-                                    text
-                                    ? this.props
-                                        .styleColorButtonTitleSelected
-                                    : this.props
-                                        .styleColorButtonTitle,
+                                color: this.state.textButtonSelected === text
+                                    ? this.props.styleColorButtonTitleSelected
+                                    : this.props.styleColorButtonTitle,
                             },
                         ] }, text),
                     this.props.alphabetCharsVisible && (React.createElement(react_native_1.Text, { style: [
@@ -127,12 +118,9 @@ class PinCode extends React.PureComponent {
                             this.props.styleAlphabet,
                             {
                                 opacity: opacity,
-                                color: this.state
-                                    .textButtonSelected === text
-                                    ? this.props
-                                        .styleColorButtonTitleSelected
-                                    : this.props
-                                        .styleColorButtonTitle,
+                                color: this.state.textButtonSelected === text
+                                    ? this.props.styleColorButtonTitleSelected
+                                    : this.props.styleColorButtonTitle,
                             },
                         ] }, alphanumericMap.get(text))))))));
         };
@@ -145,17 +133,12 @@ class PinCode extends React.PureComponent {
             }, 400);
         };
         this.renderCirclePassword = () => {
-            const { password, moveData, showError, changeScreen, attemptFailed, } = this.state;
+            const { password, moveData, showError, changeScreen, attemptFailed } = this.state;
             const colorPwdErr = this.props.colorPasswordError;
             const colorPwd = this.props.colorPassword;
             const colorPwdEmp = this.props.colorPasswordEmpty || colorPwd;
-            return (React.createElement(react_native_1.View, { style: [
-                    styles.topViewCirclePassword,
-                    this.props.styleCircleHiddenPassword,
-                ] }, _.range(this.props.passwordLength).map((val) => {
-                const lengthSup = ((password.length >= val + 1 && !changeScreen) ||
-                    showError) &&
-                    !attemptFailed;
+            return (React.createElement(react_native_1.View, { style: [styles.topViewCirclePassword, this.props.styleCircleHiddenPassword] }, _.range(this.props.passwordLength).map((val) => {
+                const lengthSup = ((password.length >= val + 1 && !changeScreen) || showError) && !attemptFailed;
                 return (React.createElement(Animate_1.default, { key: val, show: true, start: {
                         opacity: 0.5,
                         height: this._circleSizeEmpty,
@@ -169,49 +152,15 @@ class PinCode extends React.PureComponent {
                     }, update: {
                         x: [moveData.x],
                         opacity: [lengthSup ? 1 : 0.5],
-                        height: [
-                            lengthSup
-                                ? this._circleSizeFull
-                                : this._circleSizeEmpty,
-                        ],
-                        width: [
-                            lengthSup
-                                ? this._circleSizeFull
-                                : this._circleSizeEmpty,
-                        ],
-                        color: [
-                            showError
-                                ? colorPwdErr
-                                : lengthSup && password.length > 0
-                                    ? colorPwd
-                                    : colorPwdEmp,
-                        ],
-                        borderRadius: [
-                            lengthSup
-                                ? this._circleSizeFull / 2
-                                : this._circleSizeEmpty / 2,
-                        ],
-                        marginRight: [
-                            lengthSup
-                                ? 10 -
-                                    (this._circleSizeFull -
-                                        this._circleSizeEmpty) /
-                                        2
-                                : 10,
-                        ],
-                        marginLeft: [
-                            lengthSup
-                                ? 10 -
-                                    (this._circleSizeFull -
-                                        this._circleSizeEmpty) /
-                                        2
-                                : 10,
-                        ],
+                        height: [lengthSup ? this._circleSizeFull : this._circleSizeEmpty],
+                        width: [lengthSup ? this._circleSizeFull : this._circleSizeEmpty],
+                        color: [showError ? colorPwdErr : lengthSup && password.length > 0 ? colorPwd : colorPwdEmp],
+                        borderRadius: [lengthSup ? this._circleSizeFull / 2 : this._circleSizeEmpty / 2],
+                        marginRight: [lengthSup ? 10 - (this._circleSizeFull - this._circleSizeEmpty) / 2 : 10],
+                        marginLeft: [lengthSup ? 10 - (this._circleSizeFull - this._circleSizeEmpty) / 2 : 10],
                         y: [moveData.y],
                         timing: { duration: 200, ease: d3_ease_1.easeLinear },
-                    } }, ({ opacity, x, height, width, color, borderRadius, marginRight, marginLeft, }) => (React.createElement(react_native_1.View, { style: styles.viewCircles }, ((!this.props.pinCodeVisible ||
-                    (this.props.pinCodeVisible &&
-                        !lengthSup)) && (React.createElement(react_native_1.View, { style: [
+                    } }, ({ opacity, x, height, width, color, borderRadius, marginRight, marginLeft }) => (React.createElement(react_native_1.View, { style: styles.viewCircles }, ((!this.props.pinCodeVisible || (this.props.pinCodeVisible && !lengthSup)) && (React.createElement(react_native_1.View, { style: [
                         {
                             left: x,
                             height: height,
@@ -231,20 +180,16 @@ class PinCode extends React.PureComponent {
                     } },
                     React.createElement(react_native_1.Text, { style: {
                             color: color,
-                            fontFamily: this.props
-                                .textPasswordVisibleFamily,
-                            fontSize: this.props
-                                .textPasswordVisibleSize,
+                            fontFamily: this.props.textPasswordVisibleFamily,
+                            fontSize: this.props.textPasswordVisibleSize,
                         } }, this.state.password[val])))))));
             })));
         };
         this.renderButtonDelete = (opacity) => {
             return (React.createElement(react_native_1.TouchableHighlight, { activeOpacity: 1, disabled: this.state.password.length === 0, underlayColor: "transparent", onHideUnderlay: () => this.setState({
-                    colorDelete: this.props
-                        .styleDeleteButtonColorHideUnderlay,
+                    colorDelete: this.props.styleDeleteButtonColorHideUnderlay,
                 }), onShowUnderlay: () => this.setState({
-                    colorDelete: this.props
-                        .styleDeleteButtonColorShowUnderlay,
+                    colorDelete: this.props.styleDeleteButtonColorShowUnderlay,
                 }), onPress: () => {
                     if (this.state.password.length > 0) {
                         const newPass = this.state.password.slice(0, -1);
@@ -257,7 +202,7 @@ class PinCode extends React.PureComponent {
                     colorDelete: this.state.colorDelete,
                     opacity,
                 })) : (React.createElement(React.Fragment, null,
-                    !this.props.iconButtonDeleteDisabled && (React.createElement(MaterialIcons_1.default, { name: this.props.styleDeleteButtonIcon, size: this.props.styleDeleteButtonSize, color: this.state.colorDelete, style: { opacity: opacity } })),
+                    !this.props.iconButtonDeleteDisabled && (React.createElement(Icon, { name: this.props.styleDeleteButtonIcon, size: this.props.styleDeleteButtonSize, color: this.state.colorDelete, style: { opacity: opacity } })),
                     React.createElement(react_native_1.Text, { style: [
                             styles.textDeleteButton,
                             this.props.styleDeleteButtonText,
@@ -268,23 +213,13 @@ class PinCode extends React.PureComponent {
                         ] }, this.props.buttonDeleteText))))));
         };
         this.renderTitle = (colorTitle, opacityTitle, attemptFailed, showError) => {
-            return (React.createElement(react_native_1.Text, { style: [
-                    styles.textTitle,
-                    this.props.styleTextTitle,
-                    { color: colorTitle, opacity: opacityTitle },
-                ] }, (attemptFailed && this.props.titleAttemptFailed) ||
+            return (React.createElement(react_native_1.Text, { style: [styles.textTitle, this.props.styleTextTitle, { color: colorTitle, opacity: opacityTitle }] }, (attemptFailed && this.props.titleAttemptFailed) ||
                 (showError && this.props.titleConfirmFailed) ||
                 (showError && this.props.titleValidationFailed) ||
                 this.props.sentenceTitle));
         };
         this.renderSubtitle = (colorTitle, opacityTitle, attemptFailed, showError) => {
-            return (React.createElement(react_native_1.Text, { style: [
-                    styles.textSubtitle,
-                    this.props.styleTextSubtitle,
-                    { color: colorTitle, opacity: opacityTitle },
-                ] }, attemptFailed || showError
-                ? this.props.subtitleError
-                : this.props.subtitle));
+            return (React.createElement(react_native_1.Text, { style: [styles.textSubtitle, this.props.styleTextSubtitle, { color: colorTitle, opacity: opacityTitle }] }, attemptFailed || showError ? this.props.subtitleError : this.props.subtitle));
         };
         this.state = {
             password: "",
@@ -296,21 +231,17 @@ class PinCode extends React.PureComponent {
             changeScreen: false,
         };
         this._circleSizeEmpty = this.props.styleCircleSizeEmpty || 4;
-        this._circleSizeFull =
-            this.props.styleCircleSizeFull ||
-                (this.props.pinCodeVisible ? 6 : 8);
+        this._circleSizeFull = this.props.styleCircleSizeFull || (this.props.pinCodeVisible ? 6 : 8);
     }
     componentDidMount() {
         if (this.props.getCurrentLength)
             this.props.getCurrentLength(0);
     }
     componentDidUpdate(prevProps) {
-        if (prevProps.pinCodeStatus !== "failure" &&
-            this.props.pinCodeStatus === "failure") {
+        if (prevProps.pinCodeStatus !== "failure" && this.props.pinCodeStatus === "failure") {
             this.failedAttempt();
         }
-        if (prevProps.pinCodeStatus !== "locked" &&
-            this.props.pinCodeStatus === "locked") {
+        if (prevProps.pinCodeStatus !== "locked" && this.props.pinCodeStatus === "locked") {
             this.setState({ password: "" });
         }
     }
@@ -346,101 +277,55 @@ class PinCode extends React.PureComponent {
                     timing: { duration: 200, ease: d3_ease_1.easeLinear },
                 }, update: {
                     opacity: [changeScreen ? 0 : 1],
-                    colorTitle: [
-                        showError || attemptFailed
-                            ? this.props.styleColorTitleError
-                            : this.props.styleColorTitle,
-                    ],
+                    colorTitle: [showError || attemptFailed ? this.props.styleColorTitleError : this.props.styleColorTitle],
                     colorSubtitle: [
-                        showError || attemptFailed
-                            ? this.props.styleColorSubtitleError
-                            : this.props.styleColorSubtitle,
+                        showError || attemptFailed ? this.props.styleColorSubtitleError : this.props.styleColorSubtitle,
                     ],
-                    opacityTitle: [
-                        showError || attemptFailed ? grid_1.grid.highOpacity : 1,
-                    ],
+                    opacityTitle: [showError || attemptFailed ? grid_1.grid.highOpacity : 1],
                     timing: { duration: 200, ease: d3_ease_1.easeLinear },
-                } }, ({ opacity, colorTitle, colorSubtitle, opacityTitle, }) => (React.createElement(react_native_1.View, { style: [
-                    styles.viewTitle,
-                    this.props.styleViewTitle,
-                    { opacity: opacity },
-                ] },
+                } }, ({ opacity, colorTitle, colorSubtitle, opacityTitle }) => (React.createElement(react_native_1.View, { style: [styles.viewTitle, this.props.styleViewTitle, { opacity: opacity }] },
                 this.props.titleComponent
                     ? this.props.titleComponent()
                     : this.renderTitle(colorTitle, opacityTitle, attemptFailed, showError),
                 this.props.subtitleComponent
                     ? this.props.subtitleComponent()
                     : this.renderSubtitle(colorSubtitle, opacityTitle, attemptFailed, showError)))),
-            React.createElement(react_native_1.View, { style: styles.flexCirclePassword }, this.props.passwordComponent
-                ? this.props.passwordComponent()
-                : this.renderCirclePassword()),
+            React.createElement(react_native_1.View, { style: styles.flexCirclePassword }, this.props.passwordComponent ? this.props.passwordComponent() : this.renderCirclePassword()),
             React.createElement(react_native_easy_grid_1.Grid, { style: styles.grid },
                 React.createElement(react_native_easy_grid_1.Row, { style: [styles.row, this.props.styleRowButtons] }, _.range(1, 4).map((i) => {
-                    return (React.createElement(react_native_easy_grid_1.Col, { key: i, style: [
-                            styles.colButtonCircle,
-                            this.props.styleColumnButtons,
-                        ] }, this.props.buttonNumberComponent
+                    return (React.createElement(react_native_easy_grid_1.Col, { key: i, style: [styles.colButtonCircle, this.props.styleColumnButtons] }, this.props.buttonNumberComponent
                         ? this.props.buttonNumberComponent(i, this.onPressButtonNumber)
                         : this.renderButtonNumber(i.toString())));
                 })),
                 React.createElement(react_native_easy_grid_1.Row, { style: [styles.row, this.props.styleRowButtons] }, _.range(4, 7).map((i) => {
-                    return (React.createElement(react_native_easy_grid_1.Col, { key: i, style: [
-                            styles.colButtonCircle,
-                            this.props.styleColumnButtons,
-                        ] }, this.props.buttonNumberComponent
+                    return (React.createElement(react_native_easy_grid_1.Col, { key: i, style: [styles.colButtonCircle, this.props.styleColumnButtons] }, this.props.buttonNumberComponent
                         ? this.props.buttonNumberComponent(i, this.onPressButtonNumber)
                         : this.renderButtonNumber(i.toString())));
                 })),
                 React.createElement(react_native_easy_grid_1.Row, { style: [styles.row, this.props.styleRowButtons] }, _.range(7, 10).map((i) => {
-                    return (React.createElement(react_native_easy_grid_1.Col, { key: i, style: [
-                            styles.colButtonCircle,
-                            this.props.styleColumnButtons,
-                        ] }, this.props.buttonNumberComponent
+                    return (React.createElement(react_native_easy_grid_1.Col, { key: i, style: [styles.colButtonCircle, this.props.styleColumnButtons] }, this.props.buttonNumberComponent
                         ? this.props.buttonNumberComponent(i, this.onPressButtonNumber)
                         : this.renderButtonNumber(i.toString())));
                 })),
-                React.createElement(react_native_easy_grid_1.Row, { style: [
-                        styles.row,
-                        styles.rowWithEmpty,
-                        this.props.styleRowButtons,
-                    ] },
-                    React.createElement(react_native_easy_grid_1.Col, { style: [
-                            styles.colEmpty,
-                            this.props.styleEmptyColumn,
-                        ] }, this.props.emptyColumnComponent
-                        ? this.props.emptyColumnComponent(this.props.launchTouchID)
-                        : null),
-                    React.createElement(react_native_easy_grid_1.Col, { style: [
-                            styles.colButtonCircle,
-                            this.props.styleColumnButtons,
-                        ] }, this.props.buttonNumberComponent
+                React.createElement(react_native_easy_grid_1.Row, { style: [styles.row, styles.rowWithEmpty, this.props.styleRowButtons] },
+                    React.createElement(react_native_easy_grid_1.Col, { style: [styles.colEmpty, this.props.styleEmptyColumn] }, this.props.emptyColumnComponent ? this.props.emptyColumnComponent(this.props.launchTouchID) : null),
+                    React.createElement(react_native_easy_grid_1.Col, { style: [styles.colButtonCircle, this.props.styleColumnButtons] }, this.props.buttonNumberComponent
                         ? this.props.buttonNumberComponent("0", this.onPressButtonNumber)
                         : this.renderButtonNumber("0")),
-                    React.createElement(react_native_easy_grid_1.Col, { style: [
-                            styles.colButtonCircle,
-                            this.props.styleColumnButtons,
-                        ] },
+                    React.createElement(react_native_easy_grid_1.Col, { style: [styles.colButtonCircle, this.props.styleColumnButtons] },
                         React.createElement(Animate_1.default, { show: true, start: {
                                 opacity: 0.5,
                             }, update: {
-                                opacity: [
-                                    password.length === 0 ||
-                                        password.length ===
-                                            this.props.passwordLength
-                                        ? 0.5
-                                        : 1,
-                                ],
+                                opacity: [password.length === 0 || password.length === this.props.passwordLength ? 0.5 : 1],
                                 timing: { duration: 400, ease: d3_ease_1.easeLinear },
                             } }, ({ opacity }) => this.props.buttonDeleteComponent
                             ? this.props.buttonDeleteComponent(() => {
-                                if (this.state.password
-                                    .length > 0) {
+                                if (this.state.password.length > 0) {
                                     const newPass = this.state.password.slice(0, -1);
                                     this.setState({
                                         password: newPass,
                                     });
-                                    if (this.props
-                                        .getCurrentLength)
+                                    if (this.props.getCurrentLength)
                                         this.props.getCurrentLength(newPass.length);
                                 }
                             })
