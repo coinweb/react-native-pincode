@@ -10,7 +10,8 @@
     "compile": "npm run build",
     "addlocal": "yarn add file:./local_modules/react-native-pincode",
     "test": "jest",
-    "pretty": "prettier --single-quote --no-semi --jsx-bracket-same-line --write \"src/**/*.{ts, tsx}\""
+    "pretty": "prettier --single-quote --no-semi --jsx-bracket-same-line --write \"src/**/*.{ts, tsx}\"",
+    "example": "cd example && yarn install && yarn start"
   },
   "files": [
     "dist/**/*"
@@ -31,7 +32,7 @@
   "devDependencies": {
     "@types/d3-ease": "^1.0.7",
     "@types/lodash": "^4.14.104",
-    "@types/react": "^18.3.1",
+    "@types/react": "^19.0.0",
     "@types/react-native-vector-icons": "^4.4.3",
     "babel": "^6.23.0",
     "babel-jest": "^23.4.0",
@@ -39,11 +40,11 @@
     "jest": "^23.3",
     "jest-serializer-enzyme": "^1.0.0",
     "prettier": "^1.13.7",
-    "react": "^18.3.1",
+    "react": "19.0.0",
     "react-addons-test-utils": "^15.6.2",
-    "react-dom": "^18.3.1",
-    "react-native": "^0.77.3",
-    "react-test-renderer": "^18.3.1",
+    "react-dom": "19.0.0",
+    "react-native": "^0.79.7",
+    "react-test-renderer": "19.0.0",
     "typescript": "^5.6.2"
   },
   "dependencies": {
@@ -59,6 +60,12 @@
   "peerDependencies": {
     "react": "*",
     "react-native": "*"
+  },
+  "resolutions": {
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "@types/react": "19.0.0",
+    "react-native": "0.79.7"
   },
   "packageManager": "yarn@4.12.0"
 }

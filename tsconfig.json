@@ -7,10 +7,8 @@
     "outDir": "./dist",
     "strict": false,
     "moduleResolution": "node",
-    "types": [
-      "react",
-      "react-native"
-    ],
+    "types": ["react", "react-native"],
     "skipLibCheck": true
-  }
+  },
+  "exclude": ["node_modules", "dist", "example"]
 }
