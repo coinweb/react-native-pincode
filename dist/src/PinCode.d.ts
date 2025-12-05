@@ -1,5 +1,5 @@
 import * as React from "react";
-import { StyleProp, TextStyle, ViewStyle } from "react-native";
+import { Animated, StyleProp, TextStyle, ViewStyle } from "react-native";
 /**
  * Pin Code Component
  */
@@ -88,9 +88,16 @@ declare class PinCode extends React.PureComponent<IProps, IState> {
     static defaultProps: Partial<IProps>;
     private readonly _circleSizeEmpty;
     private readonly _circleSizeFull;
+    private buttonOpacityAnim;
+    private titleOpacityAnim;
+    private titleOpacityTextAnim;
+    private deleteOpacityAnim;
+    private deleteOpacityRef;
+    private circleAnims;
     constructor(props: IProps);
     componentDidMount(): void;
-    componentDidUpdate(prevProps: Readonly<IProps>): void;
+    componentDidUpdate(prevProps: Readonly<IProps>, prevState: Readonly<IState>): void;
+    updateCircleAnimations: (prevState: IState) => void;
     failedAttempt: () => Promise<void>;
     newAttempt: () => Promise<void>;
     onPressButtonNumber: (text: string) => Promise<void>;
@@ -98,9 +105,9 @@ declare class PinCode extends React.PureComponent<IProps, IState> {
     endProcess: (pwd: string) => void;
     showError(isErrorValidation?: boolean): Promise<void>;
     renderCirclePassword: () => React.JSX.Element;
-    renderButtonDelete: (opacity: number) => React.JSX.Element;
-    renderTitle: (colorTitle: string, opacityTitle: number, attemptFailed?: boolean, showError?: boolean) => React.JSX.Element;
-    renderSubtitle: (colorTitle: string, opacityTitle: number, attemptFailed?: boolean, showError?: boolean) => React.JSX.Element;
+    renderButtonDelete: (opacity: Animated.Value) => React.JSX.Element;
+    renderTitle: (colorTitle: string, opacityTitle: Animated.Value, attemptFailed?: boolean, showError?: boolean) => React.JSX.Element;
+    renderSubtitle: (colorTitle: string, opacityTitle: Animated.Value, attemptFailed?: boolean, showError?: boolean) => React.JSX.Element;
     render(): React.JSX.Element;
 }
 export default PinCode;

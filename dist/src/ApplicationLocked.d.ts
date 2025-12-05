@@ -1,5 +1,6 @@
 import { PinResultStatus } from "./utils";
 import * as React from "react";
+import { Animated } from "react-native";
 export type IProps = {
     buttonComponent?: any;
     changeStatus: (status: PinResultStatus) => void;
@@ -36,6 +37,8 @@ declare class ApplicationLocked extends React.PureComponent<IProps, IState> {
     static defaultProps: Partial<IProps>;
     timeLocked: number;
     isUnmounted: boolean;
+    contentOpacityAnim: Animated.Value;
+    buttonOpacityAnim: Animated.Value;
     constructor(props: IProps);
     componentDidMount(): void;
     timer(): Promise<void>;

@@ -4,10 +4,8 @@ import delay from "./delay";
 import { PinResultStatus } from "./utils";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { easeLinear } from "d3-ease";
 import * as React from "react";
-import Animate from "react-move/Animate";
-import { StyleSheet, View, TouchableOpacity, Text, Platform } from "react-native";
+import { Animated, StyleSheet, View, TouchableOpacity, Text, Platform } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 const Icon = MaterialIcons as React.ComponentType<any>;
 
@@ -63,6 +61,8 @@ class ApplicationLocked extends React.PureComponent<IProps, IState> {
   };
   timeLocked: number;
   isUnmounted: boolean;
+  contentOpacityAnim: Animated.Value;
+  buttonOpacityAnim: Animated.Value;
 
   constructor(props: IProps) {
     super(props);
@@ -71,6 +71,8 @@ class ApplicationLocked extends React.PureComponent<IProps, IState> {
     };
     this.isUnmounted = false;
     this.timeLocked = 0;
+    this.contentOpacityAnim = new Animated.Value(0);
+    this.buttonOpacityAnim = new Animated.Value(0);
     this.timer = this.timer.bind(this);
     this.renderButton = this.renderButton.bind(this);
     this.renderTitle = this.renderTitle.bind(this);
@@ -81,6 +83,24 @@ class ApplicationLocked extends React.PureComponent<IProps, IState> {
       this.timeLocked = new Date(val ? val : "").getTime() + this.props.timeToLock;
       this.timer();
     });
+
+    // Animate content opacity after 1000ms delay
+    setTimeout(() => {
+      Animated.timing(this.contentOpacityAnim, {
+        toValue: 1,
+        duration: 1500,
+        useNativeDriver: false,
+      }).start();
+    }, 1000);
+
+    // Animate button opacity after 2000ms delay
+    setTimeout(() => {
+      Animated.timing(this.buttonOpacityAnim, {
+        toValue: 1,
+        duration: 1500,
+        useNativeDriver: false,
+      }).start();
+    }, 2000);
   }
 
   async timer() {
@@ -152,52 +172,28 @@ class ApplicationLocked extends React.PureComponent<IProps, IState> {
     const seconds = Math.floor(this.state.timeDiff / 1000) % 60;
     return (
       <View>
-        <Animate
-          show={true}
-          start={{
-            opacity: 0,
-          }}
-          enter={{
-            opacity: [1],
-            timing: { delay: 1000, duration: 1500, ease: easeLinear },
-          }}
+        <Animated.View
+          style={[styles.viewTextLock, this.props.styleViewTextLock, { opacity: this.contentOpacityAnim }]}
         >
-          {(state: any) => (
-            <View style={[styles.viewTextLock, this.props.styleViewTextLock, { opacity: state.opacity }]}>
-              {this.props.titleComponent ? this.props.titleComponent() : this.renderTitle()}
-              {this.props.timerComponent ? this.props.timerComponent() : this.renderTimer(minutes, seconds)}
-              {this.props.iconComponent ? this.props.iconComponent() : this.renderIcon()}
-              <Text style={[styles.text, this.props.styleText]}>
-                {this.props.textDescription
-                  ? this.props.textDescription
-                  : `To protect your information, access has been locked for ${Math.ceil(
-                      this.props.timeToLock / 1000 / 60
-                    )} minutes.`}
-              </Text>
-              <Text style={[styles.text, this.props.styleText]}>
-                {this.props.textSubDescription ? this.props.textSubDescription : "Come back later and try again."}
-              </Text>
-            </View>
-          )}
-        </Animate>
-        <Animate
-          show={true}
-          start={{
-            opacity: 0,
-          }}
-          enter={{
-            opacity: [1],
-            timing: { delay: 2000, duration: 1500, ease: easeLinear },
-          }}
-        >
-          {(state: any) => (
-            <View style={{ opacity: state.opacity, flex: 1 }}>
-              <View style={[styles.viewCloseButton, this.props.styleViewButton]}>
-                {this.props.buttonComponent ? this.props.buttonComponent() : this.renderButton()}
-              </View>
-            </View>
-          )}
-        </Animate>
+          {this.props.titleComponent ? this.props.titleComponent() : this.renderTitle()}
+          {this.props.timerComponent ? this.props.timerComponent() : this.renderTimer(minutes, seconds)}
+          {this.props.iconComponent ? this.props.iconComponent() : this.renderIcon()}
+          <Text style={[styles.text, this.props.styleText]}>
+            {this.props.textDescription
+              ? this.props.textDescription
+              : `To protect your information, access has been locked for ${Math.ceil(
+                  this.props.timeToLock / 1000 / 60
+                )} minutes.`}
+          </Text>
+          <Text style={[styles.text, this.props.styleText]}>
+            {this.props.textSubDescription ? this.props.textSubDescription : "Come back later and try again."}
+          </Text>
+        </Animated.View>
+        <Animated.View style={{ opacity: this.buttonOpacityAnim, flex: 1 }}>
+          <View style={[styles.viewCloseButton, this.props.styleViewButton]}>
+            {this.props.buttonComponent ? this.props.buttonComponent() : this.renderButton()}
+          </View>
+        </Animated.View>
       </View>
     );
   };

@@ -316,7 +316,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.14.5, @babel/runtime@npm:^7.25.0":
+"@babel/runtime@npm:^7.25.0":
   version: 7.28.4
   resolution: "@babel/runtime@npm:7.28.4"
   checksum: 10c0/792ce7af9750fb9b93879cc9d1db175701c4689da890e6ced242ea0207c9da411ccf16dc04e689cc01158b28d7898c40d75598f4559109f761c12ce01e959bf7
@@ -364,13 +364,11 @@ __metadata:
   resolution: "@coinweb/react-native-pincode@workspace:."
   dependencies:
     "@react-native-async-storage/async-storage": "npm:^2.0.0"
-    "@types/d3-ease": "npm:^1.0.7"
     "@types/lodash": "npm:^4.14.104"
     "@types/react": "npm:^19.0.0"
     "@types/react-native-vector-icons": "npm:^4.4.3"
     babel: "npm:^6.23.0"
     babel-jest: "npm:^23.4.0"
-    d3-ease: "npm:^1.0.3"
     enzyme: "npm:^3.3.0"
     expo-local-authentication: "npm:^15.0.1"
     jest: "npm:^23.3"
@@ -380,7 +378,6 @@ __metadata:
     react: "npm:19.0.0"
     react-addons-test-utils: "npm:^15.6.2"
     react-dom: "npm:19.0.0"
-    react-move: "npm:^6.5.0"
     react-native: "npm:^0.79.7"
     react-native-easy-grid: "npm:^0.2.2"
     react-native-keychain: "npm:^10.0.0"
@@ -797,13 +794,6 @@ __metadata:
   dependencies:
     "@babel/types": "npm:^7.28.2"
   checksum: 10c0/b52d7d4e8fc6a9018fe7361c4062c1c190f5778cf2466817cb9ed19d69fbbb54f9a85ffedeb748ed8062d2cf7d4cc088ee739848f47c57740de1c48cbf0d0994
-  languageName: node
-  linkType: hard
-
-"@types/d3-ease@npm:^1.0.7":
-  version: 1.0.13
-  resolution: "@types/d3-ease@npm:1.0.13"
-  checksum: 10c0/a17a3f786825d5ddf245ec60857fff784ee7d01bf54639a773a43a2e1cf84124bd3386fb62f9b976eea87d4e9c4cb744defbc276aef6cfc08a2970fa39511c60
   languageName: node
   linkType: hard
 
@@ -2312,20 +2302,6 @@ __metadata:
   version: 3.2.3
   resolution: "csstype@npm:3.2.3"
   checksum: 10c0/cd29c51e70fa822f1cecd8641a1445bed7063697469d35633b516e60fe8c1bde04b08f6c5b6022136bb669b64c63d4173af54864510fbb4ee23281801841a3ce
-  languageName: node
-  linkType: hard
-
-"d3-ease@npm:^1.0.3":
-  version: 1.0.7
-  resolution: "d3-ease@npm:1.0.7"
-  checksum: 10c0/784de7696cc683f251b2186ae4e248761758bdbfab1f78f1a7bddb08a4832923033be765dba907485f8911270f9343c3068e543d33d77cca1182582b34cb4970
-  languageName: node
-  linkType: hard
-
-"d3-timer@npm:^1.0.9":
-  version: 1.0.10
-  resolution: "d3-timer@npm:1.0.10"
-  checksum: 10c0/7e77030a206861e4e626754c689795d43f036fb07a7f8ca6360eb8b7cbe6f52bf43c9c4297ae9a9a906e4de594212702f83c0cde23d4e20d8689a4211e438155
   languageName: node
   linkType: hard
 
@@ -5330,15 +5306,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"kapellmeister@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "kapellmeister@npm:3.0.1"
-  dependencies:
-    d3-timer: "npm:^1.0.9"
-  checksum: 10c0/a6d8e20abf508ed816f5f6311073beb9584de8d7f59fae801540c954b6e6159460c86e754fd8449779fae935ac5f2775f3aa678d9070749b96cb6735bd4b9d3e
-  languageName: node
-  linkType: hard
-
 "kind-of@npm:^3.0.2, kind-of@npm:^3.0.3, kind-of@npm:^3.2.0":
   version: 3.2.2
   resolution: "kind-of@npm:3.2.2"
@@ -7184,19 +7151,6 @@ __metadata:
   version: 19.2.1
   resolution: "react-is@npm:19.2.1"
   checksum: 10c0/0ebeaedb4ff615055cbcd758c7e22ba9644e21110adbd293dd1aada3591abf7399152a786cd120e324c10706d75e28c2130c27d1b9b5ae637aef4c52f4d17a91
-  languageName: node
-  linkType: hard
-
-"react-move@npm:^6.5.0":
-  version: 6.5.0
-  resolution: "react-move@npm:6.5.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.14.5"
-    kapellmeister: "npm:^3.0.1"
-    prop-types: "npm:^15.7.2"
-  peerDependencies:
-    react: ">=16.3.0"
-  checksum: 10c0/dd6a762bf39e54c436dfb33cd453f1502dd79b5ddc6e5329b4d559349808f0ddaecb70356a5d9674fd8a1cdc8795efe7c48d8fb634c19f3acb80f53f70f43af3
   languageName: node
   linkType: hard
 

@@ -5,9 +5,7 @@ const grid_1 = require("./design/grid");
 const delay_1 = require("./delay");
 const utils_1 = require("./utils");
 const async_storage_1 = require("@react-native-async-storage/async-storage");
-const d3_ease_1 = require("d3-ease");
 const React = require("react");
-const Animate_1 = require("react-move/Animate");
 const react_native_1 = require("react-native");
 const MaterialIcons_1 = require("react-native-vector-icons/MaterialIcons");
 const Icon = MaterialIcons_1.default;
@@ -39,32 +37,24 @@ class ApplicationLocked extends React.PureComponent {
             const minutes = Math.floor(this.state.timeDiff / 1000 / 60);
             const seconds = Math.floor(this.state.timeDiff / 1000) % 60;
             return (React.createElement(react_native_1.View, null,
-                React.createElement(Animate_1.default, { show: true, start: {
-                        opacity: 0,
-                    }, enter: {
-                        opacity: [1],
-                        timing: { delay: 1000, duration: 1500, ease: d3_ease_1.easeLinear },
-                    } }, (state) => (React.createElement(react_native_1.View, { style: [styles.viewTextLock, this.props.styleViewTextLock, { opacity: state.opacity }] },
+                React.createElement(react_native_1.Animated.View, { style: [styles.viewTextLock, this.props.styleViewTextLock, { opacity: this.contentOpacityAnim }] },
                     this.props.titleComponent ? this.props.titleComponent() : this.renderTitle(),
                     this.props.timerComponent ? this.props.timerComponent() : this.renderTimer(minutes, seconds),
                     this.props.iconComponent ? this.props.iconComponent() : this.renderIcon(),
                     React.createElement(react_native_1.Text, { style: [styles.text, this.props.styleText] }, this.props.textDescription
                         ? this.props.textDescription
                         : `To protect your information, access has been locked for ${Math.ceil(this.props.timeToLock / 1000 / 60)} minutes.`),
-                    React.createElement(react_native_1.Text, { style: [styles.text, this.props.styleText] }, this.props.textSubDescription ? this.props.textSubDescription : "Come back later and try again.")))),
-                React.createElement(Animate_1.default, { show: true, start: {
-                        opacity: 0,
-                    }, enter: {
-                        opacity: [1],
-                        timing: { delay: 2000, duration: 1500, ease: d3_ease_1.easeLinear },
-                    } }, (state) => (React.createElement(react_native_1.View, { style: { opacity: state.opacity, flex: 1 } },
-                    React.createElement(react_native_1.View, { style: [styles.viewCloseButton, this.props.styleViewButton] }, this.props.buttonComponent ? this.props.buttonComponent() : this.renderButton()))))));
+                    React.createElement(react_native_1.Text, { style: [styles.text, this.props.styleText] }, this.props.textSubDescription ? this.props.textSubDescription : "Come back later and try again.")),
+                React.createElement(react_native_1.Animated.View, { style: { opacity: this.buttonOpacityAnim, flex: 1 } },
+                    React.createElement(react_native_1.View, { style: [styles.viewCloseButton, this.props.styleViewButton] }, this.props.buttonComponent ? this.props.buttonComponent() : this.renderButton()))));
         };
         this.state = {
             timeDiff: 0,
         };
         this.isUnmounted = false;
         this.timeLocked = 0;
+        this.contentOpacityAnim = new react_native_1.Animated.Value(0);
+        this.buttonOpacityAnim = new react_native_1.Animated.Value(0);
         this.timer = this.timer.bind(this);
         this.renderButton = this.renderButton.bind(this);
         this.renderTitle = this.renderTitle.bind(this);
@@ -74,6 +64,22 @@ class ApplicationLocked extends React.PureComponent {
             this.timeLocked = new Date(val ? val : "").getTime() + this.props.timeToLock;
             this.timer();
         });
+        // Animate content opacity after 1000ms delay
+        setTimeout(() => {
+            react_native_1.Animated.timing(this.contentOpacityAnim, {
+                toValue: 1,
+                duration: 1500,
+                useNativeDriver: false,
+            }).start();
+        }, 1000);
+        // Animate button opacity after 2000ms delay
+        setTimeout(() => {
+            react_native_1.Animated.timing(this.buttonOpacityAnim, {
+                toValue: 1,
+                duration: 1500,
+                useNativeDriver: false,
+            }).start();
+        }, 2000);
     }
     async timer() {
         const timeDiff = +new Date(this.timeLocked) - +new Date();

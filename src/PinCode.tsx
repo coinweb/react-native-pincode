@@ -2,11 +2,19 @@ import delay from "./delay";
 import { colors } from "./design/colors";
 import { grid } from "./design/grid";
 
-import { easeLinear } from "d3-ease";
 import * as _ from "lodash";
 import * as React from "react";
-import Animate from "react-move/Animate";
-import { StyleProp, StyleSheet, Text, TextStyle, TouchableHighlight, Vibration, View, ViewStyle } from "react-native";
+import {
+  Animated,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  TouchableHighlight,
+  Vibration,
+  View,
+  ViewStyle,
+} from "react-native";
 import { Col, Row, Grid } from "react-native-easy-grid";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 const Icon = MaterialIcons as React.ComponentType<any>;
@@ -135,6 +143,24 @@ class PinCode extends React.PureComponent<IProps, IState> {
 
   private readonly _circleSizeEmpty: number;
   private readonly _circleSizeFull: number;
+  private buttonOpacityAnim: Animated.Value;
+  private titleOpacityAnim: Animated.Value;
+  private titleOpacityTextAnim: Animated.Value;
+  private deleteOpacityAnim: Animated.Value;
+  private deleteOpacityRef: { current: number };
+  private circleAnims: Map<
+    number,
+    {
+      opacity: Animated.Value;
+      height: Animated.Value;
+      width: Animated.Value;
+      borderRadius: Animated.Value;
+      marginRight: Animated.Value;
+      marginLeft: Animated.Value;
+      x: Animated.Value;
+      y: Animated.Value;
+    }
+  >;
 
   constructor(props: IProps) {
     super(props);
@@ -147,22 +173,186 @@ class PinCode extends React.PureComponent<IProps, IState> {
       attemptFailed: false,
       changeScreen: false,
     };
+    this.deleteOpacityRef = { current: 0.5 };
     this._circleSizeEmpty = this.props.styleCircleSizeEmpty || 4;
     this._circleSizeFull = this.props.styleCircleSizeFull || (this.props.pinCodeVisible ? 6 : 8);
+
+    // Initialize animated values
+    this.buttonOpacityAnim = new Animated.Value(1);
+    this.titleOpacityAnim = new Animated.Value(0); // Start at 0, animate to 1 on mount
+    this.titleOpacityTextAnim = new Animated.Value(1);
+    this.deleteOpacityAnim = new Animated.Value(0.5);
+
+    // Initialize circle animations
+    this.circleAnims = new Map();
+    for (let i = 0; i < props.passwordLength; i++) {
+      this.circleAnims.set(i, {
+        opacity: new Animated.Value(0.5),
+        height: new Animated.Value(this._circleSizeEmpty),
+        width: new Animated.Value(this._circleSizeEmpty),
+        borderRadius: new Animated.Value(this._circleSizeEmpty / 2),
+        marginRight: new Animated.Value(10),
+        marginLeft: new Animated.Value(10),
+        x: new Animated.Value(0),
+        y: new Animated.Value(0),
+      });
+    }
   }
 
   componentDidMount() {
     if (this.props.getCurrentLength) this.props.getCurrentLength(0);
+    // Initial animation for title - use native driver false to avoid conflicts
+    Animated.timing(this.titleOpacityAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+
+    // Initialize delete button opacity
+    const initialDeleteOpacity =
+      this.state.password.length === 0 || this.state.password.length === this.props.passwordLength ? 0.5 : 1;
+    this.deleteOpacityAnim.setValue(initialDeleteOpacity);
+    this.deleteOpacityRef.current = initialDeleteOpacity;
   }
 
-  componentDidUpdate(prevProps: Readonly<IProps>): void {
+  componentDidUpdate(prevProps: Readonly<IProps>, prevState: Readonly<IState>): void {
     if (prevProps.pinCodeStatus !== "failure" && this.props.pinCodeStatus === "failure") {
       this.failedAttempt();
     }
     if (prevProps.pinCodeStatus !== "locked" && this.props.pinCodeStatus === "locked") {
       this.setState({ password: "" });
     }
+
+    // Animate button opacity when error state changes
+    if (prevState.showError !== this.state.showError || prevState.attemptFailed !== this.state.attemptFailed) {
+      const targetOpacity = this.state.showError && !this.state.attemptFailed ? 0.5 : 1;
+      Animated.timing(this.buttonOpacityAnim, {
+        toValue: targetOpacity,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    }
+
+    // Animate title opacity
+    if (
+      prevState.changeScreen !== this.state.changeScreen ||
+      prevState.showError !== this.state.showError ||
+      prevState.attemptFailed !== this.state.attemptFailed
+    ) {
+      const targetOpacity = this.state.changeScreen ? 0 : 1;
+      const targetTextOpacity = this.state.showError || this.state.attemptFailed ? grid.highOpacity : 1;
+
+      Animated.timing(this.titleOpacityAnim, {
+        toValue: targetOpacity,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+
+      Animated.timing(this.titleOpacityTextAnim, {
+        toValue: targetTextOpacity,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    }
+
+    // Animate delete button opacity
+    if (prevState.password.length !== this.state.password.length) {
+      const targetOpacity =
+        this.state.password.length === 0 || this.state.password.length === this.props.passwordLength ? 0.5 : 1;
+      // Update ref immediately for synchronous access (before animation)
+      this.deleteOpacityRef.current = targetOpacity;
+      Animated.timing(this.deleteOpacityAnim, {
+        toValue: targetOpacity,
+        duration: 400,
+        useNativeDriver: false,
+      }).start();
+    }
+
+    // Animate circles
+    this.updateCircleAnimations(prevState);
   }
+
+  updateCircleAnimations = (prevState: IState) => {
+    const { password, showError, changeScreen, attemptFailed, moveData } = this.state;
+
+    this.circleAnims.forEach((anim, index) => {
+      const lengthSup = ((password.length >= index + 1 && !changeScreen) || showError) && !attemptFailed;
+      const targetHeight = lengthSup ? this._circleSizeFull : this._circleSizeEmpty;
+      const targetWidth = lengthSup ? this._circleSizeFull : this._circleSizeEmpty;
+      const targetBorderRadius = lengthSup ? this._circleSizeFull / 2 : this._circleSizeEmpty / 2;
+      const targetOpacity = lengthSup ? 1 : 0.5;
+      const targetMargin = lengthSup ? 10 - (this._circleSizeFull - this._circleSizeEmpty) / 2 : 10;
+
+      const layoutAnimations: Animated.CompositeAnimation[] = [];
+      const transformAnimations: Animated.CompositeAnimation[] = [];
+
+      if (
+        prevState.password.length !== password.length ||
+        prevState.showError !== showError ||
+        prevState.changeScreen !== changeScreen ||
+        prevState.attemptFailed !== attemptFailed
+      ) {
+        // Layout properties that cannot use native driver
+        layoutAnimations.push(
+          Animated.timing(anim.height, {
+            toValue: targetHeight,
+            duration: 200,
+            useNativeDriver: false,
+          }),
+          Animated.timing(anim.width, {
+            toValue: targetWidth,
+            duration: 200,
+            useNativeDriver: false,
+          }),
+          Animated.timing(anim.borderRadius, {
+            toValue: targetBorderRadius,
+            duration: 200,
+            useNativeDriver: false,
+          }),
+          Animated.timing(anim.marginRight, {
+            toValue: targetMargin,
+            duration: 200,
+            useNativeDriver: false,
+          }),
+          Animated.timing(anim.marginLeft, {
+            toValue: targetMargin,
+            duration: 200,
+            useNativeDriver: false,
+          })
+        );
+
+        // Opacity can use native driver, but we'll keep it with layout for simplicity
+        layoutAnimations.push(
+          Animated.timing(anim.opacity, {
+            toValue: targetOpacity,
+            duration: 200,
+            useNativeDriver: false,
+          })
+        );
+      }
+
+      if (prevState.moveData.x !== moveData.x || prevState.moveData.y !== moveData.y) {
+        // Position animations - use native driver false to match layout animations
+        layoutAnimations.push(
+          Animated.timing(anim.x, {
+            toValue: moveData.x,
+            duration: 200,
+            useNativeDriver: false,
+          }),
+          Animated.timing(anim.y, {
+            toValue: moveData.y,
+            duration: 200,
+            useNativeDriver: false,
+          })
+        );
+      }
+
+      // Run all animations together since they all use native driver false
+      if (layoutAnimations.length > 0) {
+        Animated.parallel(layoutAnimations).start();
+      }
+    });
+  };
 
   failedAttempt = async () => {
     await delay(300);
@@ -234,70 +424,51 @@ class PinCode extends React.PureComponent<IProps, IState> {
     const disabled =
       (this.state.password.length === this.props.passwordLength || this.state.showError) && !this.state.attemptFailed;
     return (
-      <Animate
-        show={true}
-        start={{
-          opacity: 1,
+      <TouchableHighlight
+        style={[styles.buttonCircle, { backgroundColor: this.props.colorCircleButtons }, this.props.styleButtonCircle]}
+        underlayColor={this.props.numbersButtonOverlayColor}
+        disabled={disabled}
+        onShowUnderlay={() => this.setState({ textButtonSelected: text })}
+        onHideUnderlay={() => this.setState({ textButtonSelected: "" })}
+        onPress={() => {
+          this.onPressButtonNumber(text);
         }}
-        update={{
-          opacity: [this.state.showError && !this.state.attemptFailed ? 0.5 : 1],
-          timing: { duration: 200, ease: easeLinear },
-        }}
+        accessible
+        accessibilityLabel={text}
       >
-        {({ opacity }: any) => (
-          <TouchableHighlight
+        <Animated.View style={{ opacity: this.buttonOpacityAnim }}>
+          <Text
             style={[
-              styles.buttonCircle,
-              { backgroundColor: this.props.colorCircleButtons },
-              this.props.styleButtonCircle,
+              styles.text,
+              this.props.styleTextButton,
+              {
+                color:
+                  this.state.textButtonSelected === text
+                    ? this.props.styleColorButtonTitleSelected
+                    : this.props.styleColorButtonTitle,
+              },
             ]}
-            underlayColor={this.props.numbersButtonOverlayColor}
-            disabled={disabled}
-            onShowUnderlay={() => this.setState({ textButtonSelected: text })}
-            onHideUnderlay={() => this.setState({ textButtonSelected: "" })}
-            onPress={() => {
-              this.onPressButtonNumber(text);
-            }}
-            accessible
-            accessibilityLabel={text}
           >
-            <View>
-              <Text
-                style={[
-                  styles.text,
-                  this.props.styleTextButton,
-                  {
-                    opacity: opacity,
-                    color:
-                      this.state.textButtonSelected === text
-                        ? this.props.styleColorButtonTitleSelected
-                        : this.props.styleColorButtonTitle,
-                  },
-                ]}
-              >
-                {text}
-              </Text>
-              {this.props.alphabetCharsVisible && (
-                <Text
-                  style={[
-                    styles.tinytext,
-                    this.props.styleAlphabet,
-                    {
-                      opacity: opacity,
-                      color:
-                        this.state.textButtonSelected === text
-                          ? this.props.styleColorButtonTitleSelected
-                          : this.props.styleColorButtonTitle,
-                    },
-                  ]}
-                >
-                  {alphanumericMap.get(text)}
-                </Text>
-              )}
-            </View>
-          </TouchableHighlight>
-        )}
-      </Animate>
+            {text}
+          </Text>
+          {this.props.alphabetCharsVisible && (
+            <Text
+              style={[
+                styles.tinytext,
+                this.props.styleAlphabet,
+                {
+                  color:
+                    this.state.textButtonSelected === text
+                      ? this.props.styleColorButtonTitleSelected
+                      : this.props.styleColorButtonTitle,
+                },
+              ]}
+            >
+              {alphanumericMap.get(text)}
+            </Text>
+          )}
+        </Animated.View>
+      </TouchableHighlight>
     );
   };
 
@@ -326,7 +497,7 @@ class PinCode extends React.PureComponent<IProps, IState> {
   }
 
   renderCirclePassword = () => {
-    const { password, moveData, showError, changeScreen, attemptFailed } = this.state;
+    const { password, showError, changeScreen, attemptFailed } = this.state;
     const colorPwdErr = this.props.colorPasswordError;
     const colorPwd = this.props.colorPassword;
     const colorPwdEmp = this.props.colorPasswordEmpty || colorPwd;
@@ -334,82 +505,58 @@ class PinCode extends React.PureComponent<IProps, IState> {
       <View style={[styles.topViewCirclePassword, this.props.styleCircleHiddenPassword]}>
         {_.range(this.props.passwordLength).map((val: number) => {
           const lengthSup = ((password.length >= val + 1 && !changeScreen) || showError) && !attemptFailed;
+          const anim = this.circleAnims.get(val);
+          if (!anim) return null;
+
+          const color = showError ? colorPwdErr : lengthSup && password.length > 0 ? colorPwd : colorPwdEmp;
+
           return (
-            <Animate
+            <Animated.View
               key={val}
-              show={true}
-              start={{
-                opacity: 0.5,
-                height: this._circleSizeEmpty,
-                width: this._circleSizeEmpty,
-                borderRadius: this._circleSizeEmpty / 2,
-                color: colorPwdEmp,
-                marginRight: 10,
-                marginLeft: 10,
-                x: 0,
-                y: 0,
-              }}
-              update={{
-                x: [moveData.x],
-                opacity: [lengthSup ? 1 : 0.5],
-                height: [lengthSup ? this._circleSizeFull : this._circleSizeEmpty],
-                width: [lengthSup ? this._circleSizeFull : this._circleSizeEmpty],
-                color: [showError ? colorPwdErr : lengthSup && password.length > 0 ? colorPwd : colorPwdEmp],
-                borderRadius: [lengthSup ? this._circleSizeFull / 2 : this._circleSizeEmpty / 2],
-                marginRight: [lengthSup ? 10 - (this._circleSizeFull - this._circleSizeEmpty) / 2 : 10],
-                marginLeft: [lengthSup ? 10 - (this._circleSizeFull - this._circleSizeEmpty) / 2 : 10],
-                y: [moveData.y],
-                timing: { duration: 200, ease: easeLinear },
-              }}
+              style={[
+                styles.viewCircles,
+                {
+                  opacity: anim.opacity,
+                  marginLeft: anim.marginLeft,
+                  marginRight: anim.marginRight,
+                  left: anim.x,
+                  top: anim.y,
+                },
+              ]}
             >
-              {({ opacity, x, height, width, color, borderRadius, marginRight, marginLeft }: any) => (
-                <View style={styles.viewCircles}>
-                  {((!this.props.pinCodeVisible || (this.props.pinCodeVisible && !lengthSup)) && (
-                    <View
-                      style={[
-                        {
-                          left: x,
-                          height: height,
-                          width: width,
-                          opacity: opacity,
-                          borderRadius: borderRadius,
-                          marginLeft: marginLeft,
-                          marginRight: marginRight,
-                          backgroundColor: color,
-                        },
-                        this.props.stylePinCodeCircle,
-                      ]}
-                    />
-                  )) || (
-                    <View
-                      style={{
-                        left: x,
-                        opacity: opacity,
-                        marginLeft: marginLeft,
-                        marginRight: marginRight,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: color,
-                          fontFamily: this.props.textPasswordVisibleFamily,
-                          fontSize: this.props.textPasswordVisibleSize,
-                        }}
-                      >
-                        {this.state.password[val]}
-                      </Text>
-                    </View>
-                  )}
+              {((!this.props.pinCodeVisible || (this.props.pinCodeVisible && !lengthSup)) && (
+                <Animated.View
+                  style={[
+                    {
+                      height: anim.height,
+                      width: anim.width,
+                      borderRadius: anim.borderRadius,
+                      backgroundColor: color,
+                    },
+                    this.props.stylePinCodeCircle,
+                  ]}
+                />
+              )) || (
+                <View>
+                  <Text
+                    style={{
+                      color: color,
+                      fontFamily: this.props.textPasswordVisibleFamily,
+                      fontSize: this.props.textPasswordVisibleSize,
+                    }}
+                  >
+                    {this.state.password[val]}
+                  </Text>
                 </View>
               )}
-            </Animate>
+            </Animated.View>
           );
         })}
       </View>
     );
   };
 
-  renderButtonDelete = (opacity: number) => {
+  renderButtonDelete = (opacity: Animated.Value) => {
     return (
       <TouchableHighlight
         activeOpacity={1}
@@ -435,11 +582,11 @@ class PinCode extends React.PureComponent<IProps, IState> {
         accessible
         accessibilityLabel={this.props.buttonDeleteText}
       >
-        <View style={[styles.colIcon, this.props.styleColumnDeleteButton]}>
+        <Animated.View style={[styles.colIcon, this.props.styleColumnDeleteButton, { opacity }]}>
           {this.props.customBackSpaceIcon ? (
             this.props.customBackSpaceIcon({
               colorDelete: this.state.colorDelete,
-              opacity,
+              opacity: this.deleteOpacityRef.current,
             })
           ) : (
             <>
@@ -448,87 +595,65 @@ class PinCode extends React.PureComponent<IProps, IState> {
                   name={this.props.styleDeleteButtonIcon}
                   size={this.props.styleDeleteButtonSize}
                   color={this.state.colorDelete}
-                  style={{ opacity: opacity }}
                 />
               )}
-              <Text
+              <Animated.Text
                 style={[
                   styles.textDeleteButton,
                   this.props.styleDeleteButtonText,
                   {
                     color: this.state.colorDelete,
-                    opacity: opacity,
                   },
                 ]}
               >
                 {this.props.buttonDeleteText}
-              </Text>
+              </Animated.Text>
             </>
           )}
-        </View>
+        </Animated.View>
       </TouchableHighlight>
     );
   };
 
-  renderTitle = (colorTitle: string, opacityTitle: number, attemptFailed?: boolean, showError?: boolean) => {
+  renderTitle = (colorTitle: string, opacityTitle: Animated.Value, attemptFailed?: boolean, showError?: boolean) => {
     return (
-      <Text style={[styles.textTitle, this.props.styleTextTitle, { color: colorTitle, opacity: opacityTitle }]}>
+      <Animated.Text
+        style={[styles.textTitle, this.props.styleTextTitle, { color: colorTitle, opacity: opacityTitle }]}
+      >
         {(attemptFailed && this.props.titleAttemptFailed) ||
           (showError && this.props.titleConfirmFailed) ||
           (showError && this.props.titleValidationFailed) ||
           this.props.sentenceTitle}
-      </Text>
+      </Animated.Text>
     );
   };
 
-  renderSubtitle = (colorTitle: string, opacityTitle: number, attemptFailed?: boolean, showError?: boolean) => {
+  renderSubtitle = (colorTitle: string, opacityTitle: Animated.Value, attemptFailed?: boolean, showError?: boolean) => {
     return (
-      <Text style={[styles.textSubtitle, this.props.styleTextSubtitle, { color: colorTitle, opacity: opacityTitle }]}>
+      <Animated.Text
+        style={[styles.textSubtitle, this.props.styleTextSubtitle, { color: colorTitle, opacity: opacityTitle }]}
+      >
         {attemptFailed || showError ? this.props.subtitleError : this.props.subtitle}
-      </Text>
+      </Animated.Text>
     );
   };
 
   render() {
-    const { password, showError, attemptFailed, changeScreen } = this.state;
+    const { password, showError, attemptFailed } = this.state;
+    const colorTitle = showError || attemptFailed ? this.props.styleColorTitleError : this.props.styleColorTitle;
+    const colorSubtitle =
+      showError || attemptFailed ? this.props.styleColorSubtitleError : this.props.styleColorSubtitle;
+
     return (
       <View style={[styles.container, this.props.styleContainer]}>
-        <Animate
-          show={true}
-          start={{
-            opacity: 0,
-            colorTitle: this.props.styleColorTitle,
-            colorSubtitle: this.props.styleColorSubtitle,
-            opacityTitle: 1,
-          }}
-          enter={{
-            opacity: [1],
-            colorTitle: [this.props.styleColorTitle],
-            colorSubtitle: [this.props.styleColorSubtitle],
-            opacityTitle: [1],
-            timing: { duration: 200, ease: easeLinear },
-          }}
-          update={{
-            opacity: [changeScreen ? 0 : 1],
-            colorTitle: [showError || attemptFailed ? this.props.styleColorTitleError : this.props.styleColorTitle],
-            colorSubtitle: [
-              showError || attemptFailed ? this.props.styleColorSubtitleError : this.props.styleColorSubtitle,
-            ],
-            opacityTitle: [showError || attemptFailed ? grid.highOpacity : 1],
-            timing: { duration: 200, ease: easeLinear },
-          }}
-        >
-          {({ opacity, colorTitle, colorSubtitle, opacityTitle }: any) => (
-            <View style={[styles.viewTitle, this.props.styleViewTitle, { opacity: opacity }]}>
-              {this.props.titleComponent
-                ? this.props.titleComponent()
-                : this.renderTitle(colorTitle, opacityTitle, attemptFailed, showError)}
-              {this.props.subtitleComponent
-                ? this.props.subtitleComponent()
-                : this.renderSubtitle(colorSubtitle, opacityTitle, attemptFailed, showError)}
-            </View>
-          )}
-        </Animate>
+        <Animated.View style={[styles.viewTitle, this.props.styleViewTitle, { opacity: this.titleOpacityAnim }]}>
+          {this.props.titleComponent
+            ? this.props.titleComponent()
+            : this.renderTitle(colorTitle, this.titleOpacityTextAnim, attemptFailed, showError)}
+          {this.props.subtitleComponent
+            ? this.props.subtitleComponent()
+            : this.renderSubtitle(colorSubtitle, this.titleOpacityTextAnim, attemptFailed, showError)}
+        </Animated.View>
         <View style={styles.flexCirclePassword}>
           {this.props.passwordComponent ? this.props.passwordComponent() : this.renderCirclePassword()}
         </View>
@@ -576,30 +701,17 @@ class PinCode extends React.PureComponent<IProps, IState> {
                 : this.renderButtonNumber("0")}
             </Col>
             <Col style={[styles.colButtonCircle, this.props.styleColumnButtons]}>
-              <Animate
-                show={true}
-                start={{
-                  opacity: 0.5,
-                }}
-                update={{
-                  opacity: [password.length === 0 || password.length === this.props.passwordLength ? 0.5 : 1],
-                  timing: { duration: 400, ease: easeLinear },
-                }}
-              >
-                {({ opacity }: any) =>
-                  this.props.buttonDeleteComponent
-                    ? this.props.buttonDeleteComponent(() => {
-                        if (this.state.password.length > 0) {
-                          const newPass = this.state.password.slice(0, -1);
-                          this.setState({
-                            password: newPass,
-                          });
-                          if (this.props.getCurrentLength) this.props.getCurrentLength(newPass.length);
-                        }
-                      })
-                    : this.renderButtonDelete(opacity)
-                }
-              </Animate>
+              {this.props.buttonDeleteComponent
+                ? this.props.buttonDeleteComponent(() => {
+                    if (this.state.password.length > 0) {
+                      const newPass = this.state.password.slice(0, -1);
+                      this.setState({
+                        password: newPass,
+                      });
+                      if (this.props.getCurrentLength) this.props.getCurrentLength(newPass.length);
+                    }
+                  })
+                : this.renderButtonDelete(this.deleteOpacityAnim)}
             </Col>
           </Row>
         </Grid>
