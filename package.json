@@ -1,6 +1,6 @@
 {
   "name": "@coinweb/react-native-pincode",
-  "version": "1.22.6-fork",
+  "version": "1.22.6-fork-2",
   "description": "React native PIN code component",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
