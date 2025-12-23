@@ -19,7 +19,11 @@ var PinStatus;
 class PinCode extends React.PureComponent {
     constructor(props) {
         super(props);
+        this.animationHandles = [];
+        this.isUnmounted = false;
         this.updateCircleAnimations = (prevState) => {
+            if (this.isUnmounted)
+                return; // Prevent animations after unmount
             const { password, showError, changeScreen, attemptFailed, moveData } = this.state;
             this.circleAnims.forEach((anim, index) => {
                 const lengthSup = ((password.length >= index + 1 && !changeScreen) || showError) && !attemptFailed;
@@ -29,7 +33,6 @@ class PinCode extends React.PureComponent {
                 const targetOpacity = lengthSup ? 1 : 0.5;
                 const targetMargin = lengthSup ? 10 - (this._circleSizeFull - this._circleSizeEmpty) / 2 : 10;
                 const layoutAnimations = [];
-                const transformAnimations = [];
                 if (prevState.password.length !== password.length ||
                     prevState.showError !== showError ||
                     prevState.changeScreen !== changeScreen ||
@@ -77,7 +80,9 @@ class PinCode extends React.PureComponent {
                 }
                 // Run all animations together since they all use native driver false
                 if (layoutAnimations.length > 0) {
-                    react_native_1.Animated.parallel(layoutAnimations).start();
+                    const parallelAnim = react_native_1.Animated.parallel(layoutAnimations);
+                    this.animationHandles.push(parallelAnim);
+                    parallelAnim.start();
                 }
             });
         };
@@ -288,31 +293,43 @@ class PinCode extends React.PureComponent {
         if (this.props.getCurrentLength)
             this.props.getCurrentLength(0);
         // Initial animation for title - use native driver false to avoid conflicts
-        react_native_1.Animated.timing(this.titleOpacityAnim, {
+        const anim = react_native_1.Animated.timing(this.titleOpacityAnim, {
             toValue: 1,
             duration: 200,
             useNativeDriver: false,
-        }).start();
+        });
+        this.animationHandles.push(anim);
+        anim.start();
         // Initialize delete button opacity
         const initialDeleteOpacity = this.state.password.length === 0 || this.state.password.length === this.props.passwordLength ? 0.5 : 1;
         this.deleteOpacityAnim.setValue(initialDeleteOpacity);
         this.deleteOpacityRef.current = initialDeleteOpacity;
     }
     componentDidUpdate(prevProps, prevState) {
+        if (this.isUnmounted)
+            return; // Prevent updates after unmount
         if (prevProps.pinCodeStatus !== "failure" && this.props.pinCodeStatus === "failure") {
             this.failedAttempt();
         }
         if (prevProps.pinCodeStatus !== "locked" && this.props.pinCodeStatus === "locked") {
-            this.setState({ password: "" });
+            // Use setTimeout to avoid setState in componentDidUpdate causing infinite loop
+            setTimeout(() => {
+                if (!this.isUnmounted) {
+                    this.setState({ password: "" });
+                }
+            }, 0);
+            return; // Early return to prevent further updates
         }
         // Animate button opacity when error state changes
         if (prevState.showError !== this.state.showError || prevState.attemptFailed !== this.state.attemptFailed) {
             const targetOpacity = this.state.showError && !this.state.attemptFailed ? 0.5 : 1;
-            react_native_1.Animated.timing(this.buttonOpacityAnim, {
+            const anim = react_native_1.Animated.timing(this.buttonOpacityAnim, {
                 toValue: targetOpacity,
                 duration: 200,
                 useNativeDriver: false,
-            }).start();
+            });
+            this.animationHandles.push(anim);
+            anim.start();
         }
         // Animate title opacity
         if (prevState.changeScreen !== this.state.changeScreen ||
@@ -320,30 +337,55 @@ class PinCode extends React.PureComponent {
             prevState.attemptFailed !== this.state.attemptFailed) {
             const targetOpacity = this.state.changeScreen ? 0 : 1;
             const targetTextOpacity = this.state.showError || this.state.attemptFailed ? grid_1.grid.highOpacity : 1;
-            react_native_1.Animated.timing(this.titleOpacityAnim, {
+            const anim1 = react_native_1.Animated.timing(this.titleOpacityAnim, {
                 toValue: targetOpacity,
                 duration: 200,
                 useNativeDriver: false,
-            }).start();
-            react_native_1.Animated.timing(this.titleOpacityTextAnim, {
+            });
+            this.animationHandles.push(anim1);
+            anim1.start();
+            const anim2 = react_native_1.Animated.timing(this.titleOpacityTextAnim, {
                 toValue: targetTextOpacity,
                 duration: 200,
                 useNativeDriver: false,
-            }).start();
+            });
+            this.animationHandles.push(anim2);
+            anim2.start();
         }
         // Animate delete button opacity
         if (prevState.password.length !== this.state.password.length) {
             const targetOpacity = this.state.password.length === 0 || this.state.password.length === this.props.passwordLength ? 0.5 : 1;
             // Update ref immediately for synchronous access (before animation)
             this.deleteOpacityRef.current = targetOpacity;
-            react_native_1.Animated.timing(this.deleteOpacityAnim, {
+            const anim = react_native_1.Animated.timing(this.deleteOpacityAnim, {
                 toValue: targetOpacity,
                 duration: 400,
                 useNativeDriver: false,
-            }).start();
+            });
+            this.animationHandles.push(anim);
+            anim.start();
         }
         // Animate circles
         this.updateCircleAnimations(prevState);
+    }
+    componentWillUnmount() {
+        this.isUnmounted = true;
+        // Stop all running animations to prevent findNodeHandle errors
+        this.animationHandles.forEach(anim => {
+            anim.stop();
+        });
+        this.animationHandles = [];
+        // Stop all circle animations
+        this.circleAnims.forEach((anim) => {
+            anim.opacity.stopAnimation();
+            anim.height.stopAnimation();
+            anim.width.stopAnimation();
+            anim.borderRadius.stopAnimation();
+            anim.marginRight.stopAnimation();
+            anim.marginLeft.stopAnimation();
+            anim.x.stopAnimation();
+            anim.y.stopAnimation();
+        });
     }
     async showError(isErrorValidation = false) {
         this.setState({ changeScreen: true });

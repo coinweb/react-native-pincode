@@ -94,9 +94,12 @@ declare class PinCode extends React.PureComponent<IProps, IState> {
     private deleteOpacityAnim;
     private deleteOpacityRef;
     private circleAnims;
+    private animationHandles;
+    private isUnmounted;
     constructor(props: IProps);
     componentDidMount(): void;
     componentDidUpdate(prevProps: Readonly<IProps>, prevState: Readonly<IState>): void;
+    componentWillUnmount(): void;
     updateCircleAnimations: (prevState: IState) => void;
     failedAttempt: () => Promise<void>;
     newAttempt: () => Promise<void>;

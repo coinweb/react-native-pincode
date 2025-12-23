@@ -162,6 +162,9 @@ class PinCode extends React.PureComponent<IProps, IState> {
     }
   >;
 
+  private animationHandles: Animated.CompositeAnimation[] = [];
+  private isUnmounted: boolean = false;
+
   constructor(props: IProps) {
     super(props);
     this.state = {
@@ -202,11 +205,13 @@ class PinCode extends React.PureComponent<IProps, IState> {
   componentDidMount() {
     if (this.props.getCurrentLength) this.props.getCurrentLength(0);
     // Initial animation for title - use native driver false to avoid conflicts
-    Animated.timing(this.titleOpacityAnim, {
+    const anim = Animated.timing(this.titleOpacityAnim, {
       toValue: 1,
       duration: 200,
       useNativeDriver: false,
-    }).start();
+    });
+    this.animationHandles.push(anim);
+    anim.start();
 
     // Initialize delete button opacity
     const initialDeleteOpacity =
@@ -216,21 +221,31 @@ class PinCode extends React.PureComponent<IProps, IState> {
   }
 
   componentDidUpdate(prevProps: Readonly<IProps>, prevState: Readonly<IState>): void {
+    if (this.isUnmounted) return; // Prevent updates after unmount
+    
     if (prevProps.pinCodeStatus !== "failure" && this.props.pinCodeStatus === "failure") {
       this.failedAttempt();
     }
     if (prevProps.pinCodeStatus !== "locked" && this.props.pinCodeStatus === "locked") {
-      this.setState({ password: "" });
+      // Use setTimeout to avoid setState in componentDidUpdate causing infinite loop
+      setTimeout(() => {
+        if (!this.isUnmounted) {
+          this.setState({ password: "" });
+        }
+      }, 0);
+      return; // Early return to prevent further updates
     }
 
     // Animate button opacity when error state changes
     if (prevState.showError !== this.state.showError || prevState.attemptFailed !== this.state.attemptFailed) {
       const targetOpacity = this.state.showError && !this.state.attemptFailed ? 0.5 : 1;
-      Animated.timing(this.buttonOpacityAnim, {
+      const anim = Animated.timing(this.buttonOpacityAnim, {
         toValue: targetOpacity,
         duration: 200,
         useNativeDriver: false,
-      }).start();
+      });
+      this.animationHandles.push(anim);
+      anim.start();
     }
 
     // Animate title opacity
@@ -242,17 +257,21 @@ class PinCode extends React.PureComponent<IProps, IState> {
       const targetOpacity = this.state.changeScreen ? 0 : 1;
       const targetTextOpacity = this.state.showError || this.state.attemptFailed ? grid.highOpacity : 1;
 
-      Animated.timing(this.titleOpacityAnim, {
+      const anim1 = Animated.timing(this.titleOpacityAnim, {
         toValue: targetOpacity,
         duration: 200,
         useNativeDriver: false,
-      }).start();
+      });
+      this.animationHandles.push(anim1);
+      anim1.start();
 
-      Animated.timing(this.titleOpacityTextAnim, {
+      const anim2 = Animated.timing(this.titleOpacityTextAnim, {
         toValue: targetTextOpacity,
         duration: 200,
         useNativeDriver: false,
-      }).start();
+      });
+      this.animationHandles.push(anim2);
+      anim2.start();
     }
 
     // Animate delete button opacity
@@ -261,18 +280,43 @@ class PinCode extends React.PureComponent<IProps, IState> {
         this.state.password.length === 0 || this.state.password.length === this.props.passwordLength ? 0.5 : 1;
       // Update ref immediately for synchronous access (before animation)
       this.deleteOpacityRef.current = targetOpacity;
-      Animated.timing(this.deleteOpacityAnim, {
+      const anim = Animated.timing(this.deleteOpacityAnim, {
         toValue: targetOpacity,
         duration: 400,
         useNativeDriver: false,
-      }).start();
+      });
+      this.animationHandles.push(anim);
+      anim.start();
     }
 
     // Animate circles
     this.updateCircleAnimations(prevState);
   }
 
+  componentWillUnmount() {
+    this.isUnmounted = true;
+    // Stop all running animations to prevent findNodeHandle errors
+    this.animationHandles.forEach(anim => {
+      anim.stop();
+    });
+    this.animationHandles = [];
+    
+    // Stop all circle animations
+    this.circleAnims.forEach((anim) => {
+      anim.opacity.stopAnimation();
+      anim.height.stopAnimation();
+      anim.width.stopAnimation();
+      anim.borderRadius.stopAnimation();
+      anim.marginRight.stopAnimation();
+      anim.marginLeft.stopAnimation();
+      anim.x.stopAnimation();
+      anim.y.stopAnimation();
+    });
+  }
+
   updateCircleAnimations = (prevState: IState) => {
+    if (this.isUnmounted) return; // Prevent animations after unmount
+    
     const { password, showError, changeScreen, attemptFailed, moveData } = this.state;
 
     this.circleAnims.forEach((anim, index) => {
@@ -284,7 +328,6 @@ class PinCode extends React.PureComponent<IProps, IState> {
       const targetMargin = lengthSup ? 10 - (this._circleSizeFull - this._circleSizeEmpty) / 2 : 10;
 
       const layoutAnimations: Animated.CompositeAnimation[] = [];
-      const transformAnimations: Animated.CompositeAnimation[] = [];
 
       if (
         prevState.password.length !== password.length ||
@@ -349,7 +392,9 @@ class PinCode extends React.PureComponent<IProps, IState> {
 
       // Run all animations together since they all use native driver false
       if (layoutAnimations.length > 0) {
-        Animated.parallel(layoutAnimations).start();
+        const parallelAnim = Animated.parallel(layoutAnimations);
+        this.animationHandles.push(parallelAnim);
+        parallelAnim.start();
       }
     });
   };
