@@ -64,22 +64,26 @@ class ApplicationLocked extends React.PureComponent {
             this.timeLocked = new Date(val ? val : "").getTime() + this.props.timeToLock;
             this.timer();
         });
+        // Store timeout IDs for cleanup
+        this.timeoutIds = [];
         // Animate content opacity after 1000ms delay
-        setTimeout(() => {
+        const timeout1 = setTimeout(() => {
             react_native_1.Animated.timing(this.contentOpacityAnim, {
                 toValue: 1,
                 duration: 1500,
                 useNativeDriver: false,
             }).start();
         }, 1000);
+        this.timeoutIds.push(timeout1);
         // Animate button opacity after 2000ms delay
-        setTimeout(() => {
+        const timeout2 = setTimeout(() => {
             react_native_1.Animated.timing(this.buttonOpacityAnim, {
                 toValue: 1,
                 duration: 1500,
                 useNativeDriver: false,
             }).start();
         }, 2000);
+        this.timeoutIds.push(timeout2);
     }
     async timer() {
         const timeDiff = +new Date(this.timeLocked) - +new Date();
@@ -95,6 +99,14 @@ class ApplicationLocked extends React.PureComponent {
     }
     componentWillUnmount() {
         this.isUnmounted = true;
+        // Clear all timeouts
+        if (this.timeoutIds) {
+            this.timeoutIds.forEach((id) => clearTimeout(id));
+            this.timeoutIds = [];
+        }
+        // Stop animations
+        this.contentOpacityAnim.stopAnimation();
+        this.buttonOpacityAnim.stopAnimation();
     }
     render() {
         return React.createElement(react_native_1.View, { style: [styles.container, this.props.styleMainContainer] }, this.renderErrorLocked());

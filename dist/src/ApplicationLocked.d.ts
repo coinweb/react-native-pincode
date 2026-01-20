@@ -39,6 +39,7 @@ declare class ApplicationLocked extends React.PureComponent<IProps, IState> {
     isUnmounted: boolean;
     contentOpacityAnim: Animated.Value;
     buttonOpacityAnim: Animated.Value;
+    timeoutIds: number[];
     constructor(props: IProps);
     componentDidMount(): void;
     timer(): Promise<void>;
