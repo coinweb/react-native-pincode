@@ -63,6 +63,7 @@ class ApplicationLocked extends React.PureComponent<IProps, IState> {
   isUnmounted: boolean;
   contentOpacityAnim: Animated.Value;
   buttonOpacityAnim: Animated.Value;
+  timeoutIds: number[];
 
   constructor(props: IProps) {
     super(props);
@@ -84,23 +85,30 @@ class ApplicationLocked extends React.PureComponent<IProps, IState> {
       this.timer();
     });
 
+    // Store timeout IDs for cleanup
+    this.timeoutIds = [];
+
     // Animate content opacity after 1000ms delay
-    setTimeout(() => {
-      Animated.timing(this.contentOpacityAnim, {
-        toValue: 1,
-        duration: 1500,
-        useNativeDriver: false,
-      }).start();
+    const timeout1 = setTimeout(() => {
+        Animated.timing(this.contentOpacityAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: false,
+        }).start();
+
     }, 1000);
+    this.timeoutIds.push(timeout1);
 
     // Animate button opacity after 2000ms delay
-    setTimeout(() => {
-      Animated.timing(this.buttonOpacityAnim, {
-        toValue: 1,
-        duration: 1500,
-        useNativeDriver: false,
-      }).start();
+    const timeout2 = setTimeout(() => {
+        Animated.timing(this.buttonOpacityAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: false,
+        }).start();
+
     }, 2000);
+    this.timeoutIds.push(timeout2);
   }
 
   async timer() {
@@ -118,6 +126,14 @@ class ApplicationLocked extends React.PureComponent<IProps, IState> {
 
   componentWillUnmount() {
     this.isUnmounted = true;
+    // Clear all timeouts
+    if (this.timeoutIds) {
+      this.timeoutIds.forEach((id) => clearTimeout(id));
+      this.timeoutIds = [];
+    }
+    // Stop animations
+    this.contentOpacityAnim.stopAnimation();
+    this.buttonOpacityAnim.stopAnimation();
   }
 
   renderButton = () => {
