@@ -16,7 +16,7 @@ export const hasPinCode = async (serviceName: string) => {
 };
 
 export const deletePinCode = async (serviceName: string) => {
-  return await Keychain.resetInternetCredentials({ service: serviceName });
+  return await Keychain.resetInternetCredentials({ server: serviceName });
 };
 
 export const resetInternalStates = async (asyncStorageKeys: string[]) => {

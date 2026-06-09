@@ -18,7 +18,7 @@ const hasPinCode = async (serviceName) => {
 };
 exports.hasPinCode = hasPinCode;
 const deletePinCode = async (serviceName) => {
-    return await react_native_keychain_1.default.resetInternetCredentials({ service: serviceName });
+    return await react_native_keychain_1.default.resetInternetCredentials({ server: serviceName });
 };
 exports.deletePinCode = deletePinCode;
 const resetInternalStates = async (asyncStorageKeys) => {
